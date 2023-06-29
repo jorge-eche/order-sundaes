@@ -59,6 +59,11 @@ test("order phases for happy path", async () => {
   expect(screen.getByText("2 Chocolate")).toBeInTheDocument();
   expect(screen.getByText("1 Hot Fudge")).toBeInTheDocument();
 
+  // // alternatively...
+  // // const optionItems = screen.getAllByRole('listitem');
+  // // const optionItemsText = optionItems.map((item) => item.textContent);
+  // // expect(optionItemsText).toEqual(['1 Vanilla', '2 Chocolate', '1 Hot Fudge']);
+
   //accept terms and conditions and click button to confirm order
   const tcCheckbox = screen.getByRole("checkbox", {
     name: /terms and conditions/i,
@@ -76,21 +81,21 @@ test("order phases for happy path", async () => {
   const loading = screen.getByText(/loading/i);
   expect(loading).toBeInTheDocument();
 
-  //confirm order number on confirmation page
+  //expect that loading has disappear
   const thankYouHeader = await screen.findByRole("heading", {
     name: "Thank you!",
   });
   expect(thankYouHeader).toBeInTheDocument();
 
+  const notLoading = screen.queryByText("loading");
+  expect(notLoading).not.toBeInTheDocument();
+
+  //confirm order number on confirmation page
   const orderNumber = await screen.findByText(/your order number is/i, {
     exact: false,
   });
 
   expect(orderNumber).toHaveTextContent(/^your order number is [0-9]{9}$/i);
-
-  //expect that loading has disappear
-  const notLoading = screen.queryByText("loading");
-  expect(notLoading).not.toBeInTheDocument();
 
   //click 'new order' button on confirmation page
   const newOrderButton = screen.getByRole("button", {
@@ -110,4 +115,43 @@ test("order phases for happy path", async () => {
 
   //do we need to await anything to avoid test errors?
   unmount();
+});
+
+test.only("order phases for happy path without toppings", async () => {
+  //render app
+  const user = userEvent.setup();
+  render(<App />);
+
+  // add Vanilla scoops
+  const vanillaInput = await screen.findByRole("spinbutton", {
+    name: "Vanilla",
+  });
+
+  await user.clear(vanillaInput);
+  await user.type(vanillaInput, "2");
+
+  //check grand total updates correctly
+  const grandTotal = screen.getByRole("heading", { name: /grand total/i });
+  expect(grandTotal).toHaveTextContent("4.00");
+
+  //click order button
+  const orderSundaeButton = screen.getByRole("button", {
+    name: "Order Sundae!",
+  });
+  await user.click(orderSundaeButton);
+
+  //confirm scoops subtotal and items
+  const scoopsSubtotal = await screen.findByRole("heading", {
+    name: "Scoops: $4.00",
+  });
+  expect(scoopsSubtotal).toBeInTheDocument();
+
+  const scoopItem = screen
+    .getAllByRole("listitem")
+    .find((listitem) => listitem.textContent === "2 Vanilla");
+  expect(scoopItem).toBeInTheDocument();
+
+  //confirm toppings subtotal does not show up on OrderSummary
+  const toppingSubtotal = screen.queryByRole("heading", { name: /toppings/i });
+  expect(toppingSubtotal).not.toBeInTheDocument();
 });
