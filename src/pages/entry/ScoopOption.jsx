@@ -9,7 +9,7 @@ export default function ScoopOptions({ name, imagePath }) {
   const [isValid, setIsValid] = useState(true);
 
   const handleChange = (event) => {
-    const currentValue = event.target.value;
+    let currentValue = event.target.value;
     const currentValueFloat = parseFloat(currentValue);
 
     //make sure we are using a number and not a string to validate
@@ -21,7 +21,9 @@ export default function ScoopOptions({ name, imagePath }) {
     //validate
     setIsValid(valueIsValid);
 
-    updateItemCount(name, parseInt(currentValue), "scoops");
+    currentValue = valueIsValid ? parseInt(currentValue) : 0;
+
+    updateItemCount(name, currentValue, "scoops");
   };
 
   return (

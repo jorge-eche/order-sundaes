@@ -1,12 +1,12 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import Row from "react-bootstrap/Row";
+import axios from "axios";
+import { useOrderDetails } from "../../contexts/OrderDetails";
+import { pricePerItem } from "../../constants";
+import { formatCurrency } from "../../utilities";
 import ScoopOption from "./ScoopOption";
 import ToppingOption from "./ToppingOption";
 import AlertBanner from "../common/AlertBanner";
-import { pricePerItem } from "../../constants";
-import { formatCurrency } from "../../utilities";
-import { useOrderDetails } from "../../contexts/OrderDetails";
+import Row from "react-bootstrap/Row";
 
 export default function Options({ optionType }) {
   const [items, setItems] = useState([]);
